@@ -10,6 +10,7 @@ author: zhouyuan
 language: zh-Hans
 timezone:
 avatar: /images/bkdefault_avatar.jpg
+duoshuo_shortname: devyzhou
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
