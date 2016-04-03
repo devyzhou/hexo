@@ -7,8 +7,9 @@ title: Hexo
 subtitle:
 description:
 author: zhouyuan
-language:
+language: zh-Hans
 timezone:
+avatar: /images/bkdefault_avatar.jpg
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
