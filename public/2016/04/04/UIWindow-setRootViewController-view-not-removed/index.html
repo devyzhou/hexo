@@ -50,7 +50,7 @@
 <meta property="og:site_name" content="山顶洞人">
 <meta property="og:description" content="在做退出登录的时候，直接修改 window.rootViewController，来导航到登录界面，发生了内存泄漏。">
 <meta property="og:image" content="http://7xlcff.com1.z0.glb.clouddn.com/16-4-4/36242137.jpg">
-<meta property="og:updated_time" content="2016-04-04T10:10:25.000Z">
+<meta property="og:updated_time" content="2016-04-04T14:47:01.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[UIWindow setRootViewController] 导致的内存泄漏">
 <meta name="twitter:description" content="在做退出登录的时候，直接修改 window.rootViewController，来导航到登录界面，发生了内存泄漏。">
@@ -94,6 +94,17 @@
     })();
   </script>
 
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55411100";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
 
 
 
@@ -155,6 +166,16 @@
               <i class="menu-item-icon fa fa-tags"></i> <br />
             
             标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-heartbeat"></i> <br />
+            
+            公益404
           </a>
         </li>
       
@@ -232,11 +253,11 @@
 
       
         <span itemprop="articleBody"><p>在做退出登录的时候，直接修改 <code>window.rootViewController</code>，来导航到登录界面，发生了内存泄漏。<a id="more"></a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//&quot;AppDelegate.m&quot;</span><br><span class="line">- (void)setupLoginViewController&#123;</span><br><span class="line">    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@&quot;Main&quot; bundle:nil];</span><br><span class="line">    UINavigationController *ZYNav = [storyboard 	    instantiateViewControllerWithIdentifier:@&quot;ZYNavigationController&quot;];</span><br><span class="line">    [UIView transitionWithView:self.window duration:0.5 options:UIViewAnimationOptionTransitionCrossDissolve animations:^&#123;</span><br><span class="line">        [self.window setRootViewController:ZYNav];</span><br><span class="line">    &#125; completion:nil];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//"AppDelegate.m"</span></span><br><span class="line">- (<span class="keyword">void</span>)setupLoginViewController&#123;</span><br><span class="line">    <span class="built_in">UIStoryboard</span> *storyboard = [<span class="built_in">UIStoryboard</span> storyboardWithName:<span class="string">@"Main"</span> bundle:<span class="literal">nil</span>];</span><br><span class="line">    <span class="built_in">UINavigationController</span> *ZYNav = [storyboard 	    instantiateViewControllerWithIdentifier:<span class="string">@"ZYNavigationController"</span>];</span><br><span class="line">    [<span class="built_in">UIView</span> transitionWithView:<span class="keyword">self</span>.window duration:<span class="number">0.5</span> options:<span class="built_in">UIViewAnimationOptionTransitionCrossDissolve</span> animations:^&#123;</span><br><span class="line">        [<span class="keyword">self</span>.window setRootViewController:ZYNav];</span><br><span class="line">    &#125; completion:<span class="literal">nil</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>但是在调试界面的时候发现，设置界面的 <code>view</code> 竟然还存在，这样在用户多次操作登录－退出登录时会导致 <code>view</code> 的无限叠加。</p>
 <p><img src="http://7xlcff.com1.z0.glb.clouddn.com/16-4-4/36242137.jpg" alt=""></p>
 <p>搜索了一下stack overflow 发现也有同样的问题存在，<a href="http://stackoverflow.com/questions/26763020/leaking-views-when-changing-rootviewcontroller-inside-transitionwithview" target="_blank" rel="external">leaking-views-when-changing-rootviewcontroller-inside-transitionwithview</a> ，解决的方法不那么优雅。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">- (void)setupLoginViewController&#123;</span><br><span class="line">    UIViewController *previousRootViewController = self.window.rootViewController;</span><br><span class="line"></span><br><span class="line">    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@&quot;Main&quot; bundle:nil];</span><br><span class="line">    UINavigationController *ZYNav = [storyboard instantiateViewControllerWithIdentifier:@&quot;ZYNavigationController&quot;];</span><br><span class="line"></span><br><span class="line">    [UIView transitionWithView:self.window duration:0.5 options:UIViewAnimationOptionTransitionCrossDissolve animations:^&#123;</span><br><span class="line">        [self.window setRootViewController:ZYNav];</span><br><span class="line">    &#125; completion:nil];</span><br><span class="line"></span><br><span class="line">    // The presenting view controllers view doesn&apos;t get removed from the window as its currently transistioning and presenting a view controller</span><br><span class="line">    for (UIView *subview in self.window.subviews) &#123;</span><br><span class="line">        if ([subview isKindOfClass:NSClassFromString(@&quot;UITransitionView&quot;)]) &#123;</span><br><span class="line">            [subview removeFromSuperview];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    // Allow the view controller to be deallocated</span><br><span class="line">    [previousRootViewController dismissViewControllerAnimated:NO completion:^&#123;</span><br><span class="line">        // Remove the root view in case its still showing</span><br><span class="line">        [previousRootViewController.view removeFromSuperview];</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)setupLoginViewController&#123;</span><br><span class="line">    <span class="built_in">UIViewController</span> *previousRootViewController = <span class="keyword">self</span>.window.rootViewController;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">UIStoryboard</span> *storyboard = [<span class="built_in">UIStoryboard</span> storyboardWithName:<span class="string">@"Main"</span> bundle:<span class="literal">nil</span>];</span><br><span class="line">    <span class="built_in">UINavigationController</span> *ZYNav = [storyboard instantiateViewControllerWithIdentifier:<span class="string">@"ZYNavigationController"</span>];</span><br><span class="line"></span><br><span class="line">    [<span class="built_in">UIView</span> transitionWithView:<span class="keyword">self</span>.window duration:<span class="number">0.5</span> options:<span class="built_in">UIViewAnimationOptionTransitionCrossDissolve</span> animations:^&#123;</span><br><span class="line">        [<span class="keyword">self</span>.window setRootViewController:ZYNav];</span><br><span class="line">    &#125; completion:<span class="literal">nil</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// The presenting view controllers view doesn't get removed from the window as its currently transistioning and presenting a view controller</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="built_in">UIView</span> *subview <span class="keyword">in</span> <span class="keyword">self</span>.window.subviews) &#123;</span><br><span class="line">        <span class="keyword">if</span> ([subview isKindOfClass:<span class="built_in">NSClassFromString</span>(<span class="string">@"UITransitionView"</span>)]) &#123;</span><br><span class="line">            [subview removeFromSuperview];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Allow the view controller to be deallocated</span></span><br><span class="line">    [previousRootViewController dismissViewControllerAnimated:<span class="literal">NO</span> completion:^&#123;</span><br><span class="line">        <span class="comment">// Remove the root view in case its still showing</span></span><br><span class="line">        [previousRootViewController.view removeFromSuperview];</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>强行移除依然存在的 <code>UITransitionView</code>  。</p>
 <p>Over</p>
 </span>

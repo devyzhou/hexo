@@ -6,7 +6,7 @@ tags: [iOS]
 
 在做退出登录的时候，直接修改 `window.rootViewController`，来导航到登录界面，发生了内存泄漏。<!--more-->
 
-``` objective-c
+```objc
 //"AppDelegate.m"
 - (void)setupLoginViewController{
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
@@ -23,7 +23,7 @@ tags: [iOS]
 
 搜索了一下stack overflow 发现也有同样的问题存在，[leaking-views-when-changing-rootviewcontroller-inside-transitionwithview](http://stackoverflow.com/questions/26763020/leaking-views-when-changing-rootviewcontroller-inside-transitionwithview) ，解决的方法不那么优雅。
 
-``` 
+```objc
 - (void)setupLoginViewController{
     UIViewController *previousRootViewController = self.window.rootViewController;
 
